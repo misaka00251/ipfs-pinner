@@ -1,6 +1,7 @@
 package infura
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,6 +18,54 @@ const (
 
 	INFURA_PROTOCAL = "https"
 )
+
+func PinFileUsingBytes(sourceFile *bytes.Buffer, sourceFileString string) (string, error) {
+	uri := fmt.Sprintf("%s://%s:%d/api/v0/add", INFURA_PROTOCAL, INFURA_HOST, INFURA_PORT)
+
+	r, w := io.Pipe()
+	m := multipart.NewWriter(w)
+
+	go func() {
+		defer w.Close()
+		defer m.Close()
+
+		part, err := m.CreateFormFile("file", fp.Base(sourceFileString))
+		if err != nil {
+			return
+		}
+
+		if _, err = io.Copy(part, sourceFile); err != nil {
+			return
+		}
+	}()
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	req, err := http.NewRequest(http.MethodPost, uri, r)
+	req.Header.Add("Content-Type", m.FormDataContentType())
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var dat map[string]interface{}
+	if err := json.Unmarshal(data, &dat); err != nil {
+		return "", err
+	}
+
+	if hash, ok := dat["Hash"].(string); ok {
+		return hash, nil
+	}
+
+	return "", fmt.Errorf("Pin file to Infura failure.")
+}
 
 func PinFile(sourceFile multipart.File, sourceFileString string) (string, error) {
 	uri := fmt.Sprintf("%s://%s:%d/api/v0/add", INFURA_PROTOCAL, INFURA_HOST, INFURA_PORT)

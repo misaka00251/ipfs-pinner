@@ -22,6 +22,59 @@ type Pinata struct {
 	Secret string
 }
 
+func (p *Pinata) PinFileUsingBytes(sourceFile *bytes.Buffer, sourceFileString string) (string, error) {
+
+	r, w := io.Pipe()
+	m := multipart.NewWriter(w)
+
+	go func() {
+		defer w.Close()
+		defer m.Close()
+
+		part, err := m.CreateFormFile("file", fp.Base(sourceFileString))
+		if err != nil {
+			return
+		}
+
+		if _, err = io.Copy(part, sourceFile); err != nil {
+			return
+		}
+	}()
+
+	req, err := http.NewRequest(http.MethodPost, PIN_FILE_URL, r)
+	req.Header.Add("Content-Type", m.FormDataContentType())
+	req.Header.Add("pinata_secret_api_key", p.Secret)
+	req.Header.Add("pinata_api_key", p.Apikey)
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var dat map[string]interface{}
+	if err := json.Unmarshal(data, &dat); err != nil {
+		return "", err
+	}
+
+	if out, err := dat["error"].(string); err {
+		return "", fmt.Errorf(out)
+	}
+	if hash, ok := dat["IpfsHash"].(string); ok {
+		return hash, nil
+	}
+
+	return "", fmt.Errorf("Pin file to Pinata failure.")
+}
+
 func (p *Pinata) PinFile(sourceFile multipart.File, sourceFileString string) (string, error) {
 
 	r, w := io.Pipe()
