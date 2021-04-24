@@ -18,7 +18,7 @@ const (
 	INFURA_PROTOCAL = "https"
 )
 
-func PinFile(sourceFile multipart.File, sourceFileHeader *multipart.FileHeader) (string, error) {
+func PinFile(sourceFile multipart.File, sourceFileString string) (string, error) {
 	uri := fmt.Sprintf("%s://%s:%d/api/v0/add", INFURA_PROTOCAL, INFURA_HOST, INFURA_PORT)
 
 	r, w := io.Pipe()
@@ -28,7 +28,7 @@ func PinFile(sourceFile multipart.File, sourceFileHeader *multipart.FileHeader) 
 		defer w.Close()
 		defer m.Close()
 
-		part, err := m.CreateFormFile("file", fp.Base(sourceFileHeader.Filename))
+		part, err := m.CreateFormFile("file", fp.Base(sourceFileString))
 		if err != nil {
 			return
 		}

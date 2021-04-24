@@ -22,7 +22,7 @@ type Pinata struct {
 	Secret string
 }
 
-func (p *Pinata) PinFile(sourceFile multipart.File, sourceFileHeader *multipart.FileHeader) (string, error) {
+func (p *Pinata) PinFile(sourceFile multipart.File, sourceFileString string) (string, error) {
 
 	r, w := io.Pipe()
 	m := multipart.NewWriter(w)
@@ -31,7 +31,7 @@ func (p *Pinata) PinFile(sourceFile multipart.File, sourceFileHeader *multipart.
 		defer w.Close()
 		defer m.Close()
 
-		part, err := m.CreateFormFile("file", fp.Base(sourceFileHeader.Filename))
+		part, err := m.CreateFormFile("file", fp.Base(sourceFileString))
 		if err != nil {
 			return
 		}
