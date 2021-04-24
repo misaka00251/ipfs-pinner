@@ -2,10 +2,9 @@ package pinner // import "github.com/misaka00251/ipfs-pinner"
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/misaka00251/ipfs-pinner/pkg/infura"
 	"github.com/misaka00251/ipfs-pinner/pkg/pinata"
+	"mime/multipart"
 )
 
 type Config struct {
@@ -14,11 +13,8 @@ type Config struct {
 	Secret string
 }
 
-// Pin file to pinning network using filepath
-func (cfg *Config) Pin(filepath string) (string, error) {
-	if _, err := os.Stat(filepath); err != nil {
-		return "", fmt.Errorf("%s: no such file%v", filepath, "\n")
-	}
+// Pin file to pinning network
+func (cfg *Config) Pin(sourceFile multipart.File, sourceFileHeader *multipart.FileHeader) (string, error) {
 
 	var cid string
 	var err error
@@ -27,10 +23,10 @@ func (cfg *Config) Pin(filepath string) (string, error) {
 	default:
 		err = fmt.Errorf("%s", "unknow pinner")
 	case "infura":
-		cid, err = infura.PinFile(filepath)
+		cid, err = infura.PinFile(sourceFile, sourceFileHeader)
 	case "pinata":
 		pnt := pinata.Pinata{Apikey: cfg.Apikey, Secret: cfg.Secret}
-		cid, err = pnt.PinFile(filepath)
+		cid, err = pnt.PinFile(sourceFile, sourceFileHeader)
 	}
 
 	return cid, err
