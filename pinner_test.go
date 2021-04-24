@@ -1,4 +1,4 @@
-package pinner // import "github.com/wabarc/ipfs-pinner"
+package pinner // import "github.com/misaka00251/ipfs-pinner"
 
 import (
 	"encoding/base64"

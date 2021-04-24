@@ -1,11 +1,11 @@
-package pinner // import "github.com/wabarc/ipfs-pinner"
+package pinner // import "github.com/misaka00251/ipfs-pinner"
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/wabarc/ipfs-pinner/pkg/infura"
-	"github.com/wabarc/ipfs-pinner/pkg/pinata"
+	"github.com/misaka00251/ipfs-pinner/pkg/infura"
+	"github.com/misaka00251/ipfs-pinner/pkg/pinata"
 )
 
 type Config struct {

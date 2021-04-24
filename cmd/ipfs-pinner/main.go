@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	Pinner "github.com/wabarc/ipfs-pinner"
+	Pinner "github.com/misaka00251/ipfs-pinner"
 )
 
 var (

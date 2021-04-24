@@ -8,7 +8,7 @@ GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v
 GOFILES := $(wildcard ./cmd/ipfs-pinner/*.go)
 VERSION := $(shell git describe --tags `git rev-list --tags --max-count=1`)
 VERSION := $(VERSION:v%=%)
-PROJECT := github.com/wabarc/ipfs-pinner
+PROJECT := github.com/misaka00251/ipfs-pinner
 PACKAGES := $(shell go list ./...)
 
 PLATFORM_LIST = \
