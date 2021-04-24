@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"os"
 	fp "path/filepath"
 	"time"
 )
@@ -19,14 +18,8 @@ const (
 	INFURA_PROTOCAL = "https"
 )
 
-func PinFile(filepath string) (string, error) {
+func PinFile(sourceFile multipart.File, sourceFileHeader *multipart.FileHeader) (string, error) {
 	uri := fmt.Sprintf("%s://%s:%d/api/v0/add", INFURA_PROTOCAL, INFURA_HOST, INFURA_PORT)
-
-	file, err := os.Open(filepath)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
 
 	r, w := io.Pipe()
 	m := multipart.NewWriter(w)
@@ -35,12 +28,12 @@ func PinFile(filepath string) (string, error) {
 		defer w.Close()
 		defer m.Close()
 
-		part, err := m.CreateFormFile("file", fp.Base(file.Name()))
+		part, err := m.CreateFormFile("file", fp.Base(sourceFileHeader.Filename))
 		if err != nil {
 			return
 		}
 
-		if _, err = io.Copy(part, file); err != nil {
+		if _, err = io.Copy(part, sourceFile); err != nil {
 			return
 		}
 	}()

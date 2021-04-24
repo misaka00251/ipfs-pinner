@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"os"
 	fp "path/filepath"
 	"time"
 )
@@ -23,12 +22,7 @@ type Pinata struct {
 	Secret string
 }
 
-func (p *Pinata) PinFile(filepath string) (string, error) {
-	file, err := os.Open(filepath)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
+func (p *Pinata) PinFile(sourceFile multipart.File, sourceFileHeader *multipart.FileHeader) (string, error) {
 
 	r, w := io.Pipe()
 	m := multipart.NewWriter(w)
@@ -37,12 +31,12 @@ func (p *Pinata) PinFile(filepath string) (string, error) {
 		defer w.Close()
 		defer m.Close()
 
-		part, err := m.CreateFormFile("file", fp.Base(file.Name()))
+		part, err := m.CreateFormFile("file", fp.Base(sourceFileHeader.Filename))
 		if err != nil {
 			return
 		}
 
-		if _, err = io.Copy(part, file); err != nil {
+		if _, err = io.Copy(part, sourceFile); err != nil {
 			return
 		}
 	}()
